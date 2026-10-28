@@ -1,22 +1,31 @@
 import sys
 
 
+def echo(argument: str):
+    print(argument)
+
+
+def type(argument: str):
+    builtins = ["exit", "echo", "type"]
+    if argument in builtins:
+        print(f"{argument} is a shell builtin")
+    else:
+        print(f"{argument}: not found")
+
+
 def main():
-    # TODO: Uncomment the code below to pass the first stage
-    exit = False
-    while exit == False:
+    while True:
         sys.stdout.write("$ ")
         cli_input = input()
-        command = cli_input.split(" ")[0]
-        argument = False
-        if len(cli_input.split(" ")) > 1:
-            argument = cli_input.split(" ", 1)[1]
-
+        cli_input_split = cli_input.split(" ", 1)
+        command = cli_input_split[0]
+        argument = cli_input_split[1] if len(cli_input_split) > 1 else ""
         if command == "exit":
-            exit = True
+            break
         elif command == "echo":
-            if argument != False:
-                print(argument)
+            echo(argument)
+        elif command == "type":
+            type(argument)
         else:
             print(f"{command}: command not found")
 
