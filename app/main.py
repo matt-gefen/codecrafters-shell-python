@@ -1,3 +1,4 @@
+import os
 import sys
 
 
@@ -5,16 +6,29 @@ class Builtins:
     def __init__(self):
         self.builtins = {"echo": self.echo, "type": self.type, "exit": self.exit}
 
-    def echo(self, argument: str):
-        print(argument)
+    def echo(self, args: str):
+        print(args)
 
-    def type(self, argument: str):
-        if argument in self.builtins:
-            print(f"{argument} is a shell builtin")
+    def type(self, args: str):
+        pathsep = os.pathsep
+        path_directories = os.environ["PATH"].split(pathsep)
+        output = f"{args}: not found"
+        if args in self.builtins:
+            output = f"{args} is a shell builtin"
         else:
-            print(f"{argument}: not found")
+            for path in path_directories:
+                try:
+                    path_files = os.listdir(path)
+                    for file in path_files:
+                        full_path = f"{path}/{file}"
+                        if file == args and os.access(full_path, os.X_OK):
+                            output = f"{args} is {full_path}"
+                except FileNotFoundError:
+                    pass
+        print(output)
 
-    def exit(self):
+    def exit(self, args: str):
+        # ignores params
         sys.exit()
 
 
@@ -27,13 +41,10 @@ def main():
         cli_input = input()
         cli_input_split = cli_input.split(" ", 1)
         command = cli_input_split[0]
-        argument = cli_input_split[1] if len(cli_input_split) > 1 else ""
-        if command in builtins.builtins:
-            if command == "exit":
-                builtins.builtins[command]()
-            else:
-                builtins.builtins[command](argument)
-        else:
+        args = cli_input_split[1] if len(cli_input_split) > 1 else ""
+        try:
+            builtins.builtins[command](args)
+        except KeyError:
             print(f"{command}: command not found")
 
 
